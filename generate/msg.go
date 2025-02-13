@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/goctl-csharp/template"
 	"github.com/zeromicro/goctl-csharp/util"
@@ -28,7 +29,7 @@ func genMessages(dir string, ns string, api *spec.ApiSpec) error {
 			return fmt.Errorf("type %s not supported", tn)
 		}
 
-		cn := util.CamelCase(tn, true)
+		cn := lo.PascalCase(tn)
 
 		data := template.CSharpApiMessageTemplateData{
 			CSharpTemplateData: template.CSharpTemplateData{Namespace: ns},
@@ -57,7 +58,7 @@ func genMessages(dir string, ns string, api *spec.ApiSpec) error {
 				}
 
 				f := template.CSharpApiMessageFieldTemplateData{
-					FieldName:  util.CamelCase(m.Name, true),
+					FieldName:  lo.PascalCase(m.Name),
 					KeyName:    k,
 					TypeName:   tn,
 					IsOptional: util.IsOptionalOrOmitEmpty(m),
