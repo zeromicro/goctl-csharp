@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -103,6 +104,11 @@ public abstract class ApiBaseClient
 
     protected static async Task<R> ParseResponseAsync<R>(HttpResponseMessage response, JsonSerializerOptions? options, CancellationToken cancellationToken) where R : new()
     {
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            throw new ApiException(await response.Content.ReadAsStringAsync(cancellationToken));
+        }
+
         R result = await response.Content.ReadFromJsonAsync<R>(options, cancellationToken) ?? new R();
         foreach (var p in typeof(R).GetProperties())
         {
