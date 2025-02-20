@@ -3,22 +3,12 @@ package generate
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/goctl-csharp/template"
 	"github.com/zeromicro/goctl-csharp/util"
-)
-
-const (
-	formTagKey   = "form"
-	pathTagKey   = "path"
-	headerTagKey = "header"
-	bodyTagKey   = "json"
-)
-
-var (
-	tagKeys = []string{pathTagKey, formTagKey, headerTagKey, bodyTagKey}
 )
 
 func genMessages(dir string, ns string, api *spec.ApiSpec) error {
@@ -37,35 +27,29 @@ func genMessages(dir string, ns string, api *spec.ApiSpec) error {
 			Fields:             []template.CSharpApiMessageFieldTemplateData{},
 		}
 
-		for _, tagKey := range tagKeys {
-			// 获取字段
-			ms := definedType.GetTagMembers(tagKey)
-			if len(ms) <= 0 {
-				continue
+		for _, m := range definedType.Members {
+			k, err := m.GetPropertyName()
+			if err != nil {
+				return err
+			}
+			tn, err := apiTypeToCsTypeName(m.Type)
+			if err != nil {
+				return err
 			}
 
-			for _, m := range ms {
-				tags := m.Tags()
-				k := ""
-				if len(tags) > 0 {
-					k = tags[0].Name
-				} else {
-					k = m.Name
-				}
-				tn, err := apiTypeToCsTypeName(m.Type)
-				if err != nil {
-					return err
-				}
-
-				f := template.CSharpApiMessageFieldTemplateData{
-					FieldName:  lo.PascalCase(m.Name),
-					KeyName:    k,
-					TypeName:   tn,
-					IsOptional: util.IsOptionalOrOmitEmpty(m),
-					Tag:        tagKey,
-				}
-				data.Fields = append(data.Fields, f)
+			tag, _, ok := strings.Cut(strings.Trim(m.Tag, "`"), ":")
+			if !ok {
+				return fmt.Errorf("type %s not tag: %s", tn, m.Tag)
 			}
+
+			f := template.CSharpApiMessageFieldTemplateData{
+				FieldName:  lo.PascalCase(m.Name),
+				KeyName:    k,
+				TypeName:   tn,
+				IsOptional: util.IsOptionalOrOmitEmpty(m),
+				Tag:        tag,
+			}
+			data.Fields = append(data.Fields, f)
 		}
 
 		if err := template.WriteFile(dir, cn, template.ApiMessage, data); err != nil {
