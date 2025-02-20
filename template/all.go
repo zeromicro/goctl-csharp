@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/zeromicro/goctl-csharp/util"
+	"github.com/samber/lo"
 )
 
 //go:embed ApiAttribute.tpl
@@ -66,8 +66,9 @@ type CSharpApiClientTemplateData struct {
 func WriteFile(dir string, name string, tpl string, data any) error {
 	tmpl, err := template.New(name).
 		Funcs(template.FuncMap{
-			"CamelCase": util.CamelCase,
-			"ToUpper":   strings.ToUpper,
+			"CamelCase":  lo.CamelCase,
+			"PascalCase": lo.PascalCase,
+			"ToUpper":    strings.ToUpper,
 		}).
 		Parse(tpl)
 	if err != nil {

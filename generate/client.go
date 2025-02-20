@@ -6,6 +6,7 @@ import (
 
 	_ "embed"
 
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/goctl-csharp/template"
 	"github.com/zeromicro/goctl-csharp/util"
@@ -32,7 +33,7 @@ func genClient(dir string, ns string, api *spec.ApiSpec) error {
 }
 
 func writeClient(dir string, ns string, api *spec.ApiSpec) error {
-	name := util.CamelCase(api.Service.Name, true)
+	name := lo.PascalCase(api.Service.Name)
 
 	data := template.CSharpApiClientTemplateData{
 		CSharpTemplateData: template.CSharpTemplateData{Namespace: ns},
@@ -43,11 +44,11 @@ func writeClient(dir string, ns string, api *spec.ApiSpec) error {
 	// 组
 	for _, g := range api.Service.Groups {
 		prefix := g.GetAnnotation("prefix")
-		p := util.CamelCase(prefix, true)
+		p := lo.PascalCase(prefix)
 
 		// 路由
 		for _, r := range g.Routes {
-			an := util.CamelCase(r.Path, true)
+			an := lo.PascalCase(r.Path)
 			method := util.UpperHead(strings.ToLower(r.Method), 1)
 
 			route := template.CSharpApiClientRouteTemplateData{

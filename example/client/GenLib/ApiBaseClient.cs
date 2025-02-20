@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Reflection;
 using System.Web;
 
-namespace {{.Namespace}};
+namespace GenLib;
 
 public abstract class ApiBaseClient
 {
