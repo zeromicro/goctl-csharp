@@ -18,7 +18,7 @@ public abstract class ApiBaseClient
 
     protected async Task<R> CallResultAsync<R>(HttpMethod method, string path, CancellationToken cancellationToken, HttpContent? body) where R : new()
     {
-        var response = await CallAsync(HttpMethod.Post, path, cancellationToken, body);
+        var response = await CallAsync(method, path, cancellationToken, body);
         return await ParseResponseAsync<R>(response, null, cancellationToken);
     }
 
@@ -35,7 +35,7 @@ public abstract class ApiBaseClient
 
     protected async Task<R> RequestResultAsync<T, R>(HttpMethod method, string path, T? param, CancellationToken cancellationToken, HttpContent? body) where R : new()
     {
-        var response = await RequestAsync(HttpMethod.Post, path, param, cancellationToken, body);
+        var response = await RequestAsync(method, path, param, cancellationToken, body);
         return await ParseResponseAsync<R>(response, null, cancellationToken);
     }
 
@@ -83,7 +83,7 @@ public abstract class ApiBaseClient
                 var ppn = p.GetCustomAttribute<PathPropertyName>();
                 if (ppn != null)
                 {
-                    path.Replace($":{ppn.Name}", pv?.ToString() ?? "");
+                    path = path.Replace($":{ppn.Name}", pv?.ToString() ?? "");
                     continue;
                 }
             }
